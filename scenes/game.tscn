@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://bduw5gb057ino"]
+
+[ext_resource type="Script" uid="uid://cqbfim3wtsvbc" path="res://scripts/game.gd" id="1_5vnjt"]
+[ext_resource type="PackedScene" uid="uid://cqpatfifsn3sg" path="res://scenes/player.tscn" id="2_n47hv"]
+[ext_resource type="Script" uid="uid://b2tc20wbesi5h" path="res://scripts/player_stats.gd" id="3_stats"]
+[ext_resource type="Script" uid="uid://bpktr3vdk6yrl" path="res://scripts/room_manager.gd" id="4_room"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7nvpe"]
+size = Vector2(1024, 55.3125)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_akqs3"]
+size = Vector2(64, 528)
+
+[node name="Game" type="Node2D" unique_id=1279034726]
+script = ExtResource("1_5vnjt")
+shake_decay_rate = 5.0
+
+[node name="Background" type="Polygon2D" parent="." unique_id=658240448]
+z_index = -50
+color = Color(0, 0.0705882, 0.0980392, 1)
+polygon = PackedVector2Array(-832, -896, -832, 1408, 2176, 1408, 2176, -896)
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="Background" unique_id=1939422953]
+collision_layer = 2
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Background/StaticBody2D2" unique_id=1901924303]
+position = Vector2(576, 27.6563)
+shape = SubResource("RectangleShape2D_7nvpe")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Background" unique_id=523985069]
+collision_layer = 2
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Background/StaticBody2D" unique_id=1748914904]
+position = Vector2(576, 611)
+shape = SubResource("RectangleShape2D_7nvpe")
+
+[node name="StaticBody2D3" type="StaticBody2D" parent="Background" unique_id=2102186720]
+collision_layer = 2
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Background/StaticBody2D3" unique_id=1935812985]
+position = Vector2(32, 320)
+shape = SubResource("RectangleShape2D_akqs3")
+
+[node name="StaticBody2D4" type="StaticBody2D" parent="Background" unique_id=415305547]
+collision_layer = 2
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Background/StaticBody2D4" unique_id=30274287]
+position = Vector2(1120, 320)
+shape = SubResource("RectangleShape2D_akqs3")
+
+[node name="Ground" type="Polygon2D" parent="." unique_id=1184047230]
+z_index = -49
+color = Color(0.25882354, 0.25882354, 0.25882354, 1)
+polygon = PackedVector2Array(64, 56, 64, 320, 64, 584, 1088, 584, 1088, 56)
+
+[node name="Player" parent="." unique_id=118852400 instance=ExtResource("2_n47hv")]
+
+[node name="PlayerStats" type="Node" parent="." unique_id=275304734]
+script = ExtResource("3_stats")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1489375413]
+position = Vector2(576, 323)
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1450194315]
+
+[node name="HealthBar" type="ProgressBar" parent="HUD" unique_id=550920172]
+custom_minimum_size = Vector2(0, 20)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 74.0
+offset_top = -626.0
+offset_right = 374.0
+offset_bottom = -606.0
+grow_vertical = 0
+step = 1.0
+value = 100.0
+show_percentage = false
+
+[node name="GameOverLabel" type="Label" parent="HUD" unique_id=1001770764]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -30.0
+offset_right = 150.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "GAME OVER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HealthText" type="Label" parent="HUD" unique_id=1144057979]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 79.0
+offset_top = -628.0
+offset_right = 199.0
+offset_bottom = -600.0
+grow_vertical = 0
+text = "HP: 100/100"
+
+[node name="FloorText" type="Label" parent="HUD" unique_id=423796596]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 383.0
+offset_top = -629.0
+offset_right = 559.0
+offset_bottom = -605.0
+grow_vertical = 0
+text = "Floor: 1"
+
+[node name="KeyText" type="Label" parent="HUD" unique_id=2135116132]
+visible = false
+modulate = Color(1, 0.8, 0.2, 1)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 80.0
+offset_right = 200.0
+offset_bottom = 104.0
+grow_vertical = 0
+text = "KEY ACQUIRED!"
+
+[node name="EnemyCounterText" type="Label" parent="HUD" unique_id=2020624432]
+modulate = Color(0.9, 0.9, 0.9, 1)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 462.0
+offset_top = -627.0
+offset_right = 718.0
+offset_bottom = -603.0
+grow_vertical = 0
+text = "Enemies to door: 0"
+
+[node name="RoomManager" type="Node" parent="." unique_id=35755925]
+script = ExtResource("4_room")

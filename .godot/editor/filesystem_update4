@@ -1,0 +1,3 @@
+res://scenes/bullet.tscn
+res://scenes/enemy.tscn
+res://shader/bot_flash.gdshader

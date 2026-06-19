@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://vkxwpg7ceyd0"]
+
+[ext_resource type="Script" uid="uid://b3kyfctvefykr" path="res://scripts/bullet.gd" id="1_0qisn"]
+[ext_resource type="AudioStream" uid="uid://dq05a2ska8t6s" path="res://assets/sound_effects/hitHurt.wav" id="2_fwpsb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y25gk"]
+size = Vector2(15, 14)
+
+[node name="Bullet" type="Area2D" unique_id=20855757 groups=["bullet"]]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("1_0qisn")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=798274727]
+position = Vector2(4, 2)
+color = Color(0, 0.372549, 0.45098, 1)
+polygon = PackedVector2Array(-10.758118, -4.2127366, -7, 0, -11.352692, 3.5167294, -3.6232147, 1.584363, 2, 5, -1, 0, 3, -4, -3, -2, -5, -9, -6, -4)
+uv = PackedVector2Array(-10.758118, -4.2127366, -7.6365967, -0.94257736, -11.352692, 3.5167294, -3.6232147, 1.584363, -0.055770874, 3.8140173, 1.2820129, -1.9830828, -2.1367798, -1.8344393, -0.65034485, -7.0369644, -6.298813, -6.4423904, -5.258301, -3.4695187)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2071183610]
+shape = SubResource("RectangleShape2D_y25gk")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1349977713]
+stream = ExtResource("2_fwpsb")
+volume_db = -12.0
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

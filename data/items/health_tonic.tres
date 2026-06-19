@@ -1,0 +1,14 @@
+[gd_resource type="Resource" format=3]
+
+/resource/script = ExtResource("1")
+
+[ext_resource type="Script" id="1" path="res://scripts/item_data.gd" id="1"]
+
+[resource]
+item_id = "health_tonic"
+display_name = "Health Tonic"
+description = "A restorative tonic that boosts vitality."
+attack_mod = 0
+max_health_mod = 20
+armor_mod = 0
+rarity = 0

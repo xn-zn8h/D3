@@ -1,0 +1,14 @@
+[gd_resource type="Resource" format=3]
+
+/resource/script = ExtResource("1")
+
+[ext_resource type="Script" id="1" path="res://scripts/item_data.gd" id="1"]
+
+[resource]
+item_id = "demon_fang"
+display_name = "Demon Fang"
+description = "A legendary fang from a demon lord. Grants immense power."
+attack_mod = 15
+max_health_mod = 30
+armor_mod = 5
+rarity = 3
