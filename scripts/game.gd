@@ -106,6 +106,10 @@ func _ready():
 	$HUD/DeathScreen/DeathVBox/DeathRestartButton.pressed.connect(_on_death_restart_pressed)
 	$HUD/DeathScreen/DeathVBox/DeathQuitButton.pressed.connect(_on_death_quit_pressed)
 	
+	# CRITICAL: Set process mode to ALWAYS so _input() works when tree is paused
+	# This allows ESC key to toggle pause/unpause and work during death screen
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	
 	# Set initial floor text before room setup
 	hud_floor_text.text = "Floor: %d" % room_manager.current_floor
 	print("[HUD] Initial floor: ", room_manager.current_floor)
