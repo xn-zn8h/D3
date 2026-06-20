@@ -77,7 +77,6 @@ func _create_telegraph_visuals():
 	dash_path_line = Line2D.new()
 	dash_path_line.default_color = Color(1, 0.2, 0, 0.8)
 	dash_path_line.width = 4.0
-	dash_path_line.jmiter = 1
 	dash_path_line.visible = false
 	add_child(dash_path_line)
 
@@ -281,25 +280,3 @@ func _on_animation_tree_animation_finished(anim_name):
 	elif anim_name == "destroy":
 		animation_tree['parameters/conditions/is_destroyed'] = false
 		destroy()
-
-func _on_damage_area_body_entered(body):
-	if body == player:
-		# Touch damage - always deals damage when player touches enemy during dash
-		if current_state == State.DASH:
-			var knockback_dir = (player.global_position - global_position).normalized()
-			player.take_damage(dash_damage, knockback_dir)
-			if not dash_has_hit:
-				dash_has_hit = true
-		
-		# Dash path damage - triple damage if player is in the dash trajectory
-		if dash_path_active and current_state == State.DASH:
-			# Check if player is within the dash path width
-			var player_to_enemy = player.global_position - global_position
-			var projection = player_to_enemy.dot(dash_direction)
-			var perpendicular_dist = (player_to_enemy - dash_direction * projection).length()
-			
-			if perpendicular_dist < dash_path_width and projection > 0:
-				var knockback_dir = (player.global_position - global_position).normalized()
-				player.take_damage(dash_path_damage, knockback_dir)
-				if not dash_path_has_hit:
-					dash_path_has_hit = true

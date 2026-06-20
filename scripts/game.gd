@@ -18,18 +18,31 @@ var shake_strength: float = 0.0
 @onready var noise = FastNoiseLite.new()
 @onready var rand = RandomNumberGenerator.new()
 @onready var player_stats: Node = $PlayerStats
-@onready var room_manager: Node = $RoomManager
+var room_manager = RoomManager
 @onready var hud_health_bar: ProgressBar = $HUD/HealthBar
 @onready var hud_health_text: Label = $HUD/HealthText
 @onready var hud_floor_text: Label = $HUD/FloorText
 @onready var hud_key_text: Label = $HUD/KeyText
 @onready var hud_enemy_counter: Label = $HUD/EnemyCounterText
 @onready var game_over_label: Label = $HUD/GameOverLabel
+@onready var pause_menu: Control = $HUD/PauseMenu
+@onready var death_screen: Control = $HUD/DeathScreen
+@onready var death_score_label: Label = $HUD/DeathScreen/DeathVBox/ScoreLabel
+@onready var name_input: LineEdit = $HUD/DeathScreen/DeathVBox/NameInput
+@onready var submit_score_button: Button = $HUD/DeathScreen/DeathVBox/SubmitScoreButton
+@onready var high_score_display: Label = $HUD/DeathScreen/DeathVBox/HighScoreDisplay
 
 var is_game_over: bool = false
+var is_paused: bool = false
 var is_transitioning: bool = false  # Guard against rapid room transitions
 var urn_list: Array = []  # Track active urns in current room
 var door_list: Array = []  # Track active doors in current room
+var current_score: int = 0  # Score metric (current floor)
+
+# Inventory system
+var inventory: Dictionary = {}  # item_id -> count
+var inventory_panel: Control = null
+var inventory_vbox: VBoxContainer = null
 
 func _ready():
 	var screen_size = get_viewport_rect().size
@@ -47,7 +60,7 @@ func _ready():
 	print("[HUD] Initializing HUD elements...")
 	var default_font = ThemeDB.fallback_font
 	for child in $HUD.get_children():
-		if child != game_over_label:
+		if child != game_over_label and child != pause_menu and child != death_screen:
 			child.visible = true
 			if child is Label:
 				child.add_theme_color_override("font_color", Color.WHITE)
@@ -65,6 +78,33 @@ func _ready():
 	hud_health_text.text = "HP: %d/%d" % [player_stats.current_health, player_stats.max_health]
 	hud_key_text.visible = false
 	game_over_label.visible = false
+	
+	# Create inventory HUD panel
+	_create_inventory_hud()
+	pause_menu.visible = false
+	death_screen.visible = false
+	
+	# Apply theme overrides to death screen labels for readability
+	var death_title: Label = $HUD/DeathScreen/DeathVBox/DeathTitle
+	death_title.add_theme_color_override("font_color", Color.WHITE)
+	death_title.add_theme_font_override("font", default_font)
+	death_title.add_theme_font_size_override("font_size", 32)
+	death_score_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4, 1.0))
+	death_score_label.add_theme_font_override("font", default_font)
+	death_score_label.add_theme_font_size_override("font_size", 18)
+	$HUD/DeathScreen/DeathVBox/HighScoreDisplay.add_theme_color_override("font_color", Color(0.7, 1.0, 0.7, 1.0))
+	$HUD/DeathScreen/DeathVBox/HighScoreDisplay.add_theme_font_override("font", default_font)
+	$HUD/DeathScreen/DeathVBox/HighScoreDisplay.add_theme_font_size_override("font_size", 16)
+	
+	# Connect pause menu button signals
+	$HUD/PauseMenu/PauseVBox/ResumeButton.pressed.connect(_on_resume_button_pressed)
+	$HUD/PauseMenu/PauseVBox/RestartButton.pressed.connect(_on_restart_button_pressed)
+	$HUD/PauseMenu/PauseVBox/QuitButton.pressed.connect(_on_quit_button_pressed)
+	
+	# Connect death screen button signals
+	$HUD/DeathScreen/DeathVBox/SubmitScoreButton.pressed.connect(_on_submit_score_pressed)
+	$HUD/DeathScreen/DeathVBox/DeathRestartButton.pressed.connect(_on_death_restart_pressed)
+	$HUD/DeathScreen/DeathVBox/DeathQuitButton.pressed.connect(_on_death_quit_pressed)
 	
 	# Set initial floor text before room setup
 	hud_floor_text.text = "Floor: %d" % room_manager.current_floor
@@ -144,9 +184,13 @@ func setup_room():
 
 func _enforce_hud_visibility():
 	# Ensure all HUD elements are visible after room transitions
+	# Exclude pause_menu, death_screen, game_over_label, and inventory_panel from being forced visible
 	for child in $HUD.get_children():
-		if child != game_over_label:
+		if child != game_over_label and child != pause_menu and child != death_screen and child != inventory_panel:
 			child.visible = true
+	# Inventory should be hidden unless paused
+	if inventory_panel:
+		inventory_panel.visible = is_paused
 
 func spawn_enemy():
 	var enemy = enemy_class.instantiate()
@@ -194,12 +238,11 @@ func _on_urn_broken(item_data: Resource, urn_position: Vector2):
 	item_drop.item_resource = item_data
 	item_drop.position = urn_position
 	# Signal already carries item_resource, so handler receives it directly - no .bind() needed
-	item_drop.item_picked_up.connect(func(item_data):
-		_on_item_picked_up(item_data)
+	item_drop.item_picked_up.connect(func(item_resource):
+		_on_item_picked_up(item_resource)
 	)
 	add_child.call_deferred(item_drop)
-	# Show notification
-	show_item_notification(item_data)
+	# Note: Notification is shown in _on_item_picked_up when player actually collects the item
 
 func show_item_notification(item_data: Resource):
 	# Create floating text notification
@@ -291,6 +334,11 @@ func _spawn_doors():
 func _on_door_entered(direction: String):
 	var success = room_manager.enter_door(direction)
 	if success:
+		# Mark the triggering door as triggered so it can't be reused
+		for door in door_list:
+			if is_instance_valid(door) and door.door_direction == direction and not door.triggered:
+				door.mark_triggered()
+				break
 		setup_room()
 		# Move player to door position based on direction entered
 		match direction:
@@ -320,6 +368,15 @@ func _on_item_picked_up(item_data: Resource):
 	# Apply item stats to player
 	if item_data:
 		item_data.apply_to_stats(player_stats)
+		# Track in inventory
+		var item_id = item_data.item_id if item_data is ItemData else "unknown"
+		if item_id == "":
+			item_id = "unknown"
+		if inventory.has(item_id):
+			inventory[item_id] += 1
+		else:
+			inventory[item_id] = 1
+		update_inventory(item_id, inventory[item_id])
 		# Show pickup confirmation
 		show_item_notification(item_data)
 
@@ -359,8 +416,7 @@ func _process(delta: float):
 
 func _on_player_died():
 	is_game_over = true
-	game_over_label.visible = true
-	game_over_label.text = "GAME OVER\n\nPress R to Restart"
+	current_score = room_manager.current_floor  # Score = floors completed
 	# Stop all enemies and player
 	for enemy in enemy_list:
 		if is_instance_valid(enemy):
@@ -369,16 +425,151 @@ func _on_player_died():
 	# Disable player input
 	player.set_process(false)
 	player.set_physics_process(false)
+	# Show death screen with high score entry
+	game_over_label.visible = false
+	death_screen.visible = true
+	# CRITICAL: Set death screen to always process so UI works when tree is paused
+	death_screen.process_mode = Node.PROCESS_MODE_ALWAYS
+	death_score_label.text = "You reached floor %d" % current_score
+	name_input.text = ""
+	name_input.grab_focus()
+	submit_score_button.visible = true
+	high_score_display.visible = false
+	# Pause the game AFTER showing death screen and grabbing focus
+	get_tree().paused = true
 
 func _on_health_changed(current_health: int, max_health: int):
 	hud_health_bar.max_value = max_health
 	hud_health_bar.value = current_health
 	hud_health_text.text = "HP: %d/%d" % [current_health, max_health]
 
+func _create_inventory_hud():
+	# Create panel for inventory
+	inventory_panel = Panel.new()
+	inventory_panel.name = "InventoryPanel"
+	inventory_panel.anchor_right = 0.0
+	inventory_panel.anchor_bottom = 1.0
+	inventory_panel.offset_left = 10.0
+	inventory_panel.offset_top = 10.0
+	inventory_panel.offset_right = 160.0
+	inventory_panel.offset_bottom = -100.0
+	$HUD.add_child(inventory_panel)
+	
+	# Create VBoxContainer for inventory items
+	inventory_vbox = VBoxContainer.new()
+	inventory_vbox.name = "InventoryVBox"
+	inventory_panel.add_child(inventory_vbox)
+	
+	# Add title label
+	var title_label = Label.new()
+	title_label.text = "— INVENTORY —"
+	title_label.add_theme_color_override("font_color", Color.WHITE)
+	title_label.add_theme_font_override("font", ThemeDB.fallback_font)
+	title_label.add_theme_font_size_override("font_size", 14)
+	inventory_vbox.add_child(title_label)
+
+func update_inventory(item_id: String, count: int):
+	# Update inventory dictionary
+	if count <= 0:
+		inventory.erase(item_id)
+	else:
+		inventory[item_id] = count
+	
+	# Refresh HUD display
+	_refresh_inventory_hud()
+
+func _refresh_inventory_hud():
+	# Clear existing labels (keep title)
+	for child in inventory_vbox.get_children():
+		if child is Label and child.text != "— INVENTORY —":
+			child.queue_free()
+	
+	# Add labels for each item in inventory
+	for item_id in inventory:
+		var count = inventory[item_id]
+		if count > 0:
+			var label = Label.new()
+			# Abbreviated name: first 2 letters of each word in item_id
+			var short_name = _get_short_name(item_id)
+			label.text = "%s: %d" % [short_name, count]
+			label.add_theme_color_override("font_color", Color.WHITE)
+			label.add_theme_font_override("font", ThemeDB.fallback_font)
+			label.add_theme_font_size_override("font_size", 14)
+			inventory_vbox.add_child(label)
+
+func _get_short_name(item_id: String) -> String:
+	# Convert item_id like "demon_fang" to "DeFa"
+	var parts = item_id.split("_")
+	var result = ""
+	for part in parts:
+		if part.length() >= 2:
+			result += part.substr(0, 1).to_upper() + part.substr(1, 1).to_lower()
+		elif part.length() == 1:
+			result += part.substr(0, 1).to_upper()
+	return result
+
 func _input(event):
+	# Handle pause menu toggle (ESC key)
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		if not is_game_over and not death_screen.visible:
+			toggle_pause()
+		return
+	
+	if is_paused:
+		return
+	
 	if is_game_over and event is InputEventKey and event.pressed:
 		if event.keycode == KEY_R:
 			get_tree().reload_current_scene()
+		if event.keycode == KEY_ESCAPE:
+			# Allow ESC to quit to main menu from game over
+			change_to_main_menu()
+
+func toggle_pause():
+	is_paused = !is_paused
+	get_tree().paused = is_paused
+	pause_menu.visible = is_paused
+	# Show/hide inventory with pause menu
+	if inventory_panel:
+		inventory_panel.visible = is_paused
+	if is_paused:
+		player.set_process(false)
+		player.set_physics_process(false)
+	else:
+		if not is_game_over:
+			player.set_process(true)
+			player.set_physics_process(true)
+
+func _on_resume_button_pressed():
+	toggle_pause()
+
+func _on_restart_button_pressed():
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _on_quit_button_pressed():
+	get_tree().paused = false
+	change_to_main_menu()
+
+func change_to_main_menu():
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+
+func _on_submit_score_pressed():
+	var score_name = name_input.text.strip_edges()
+	if score_name.is_empty():
+		score_name = "Anonymous"
+	HighScoreManager.add_high_score(score_name, current_score)
+	high_score_display.visible = true
+	high_score_display.text = "Score saved!"
+	submit_score_button.visible = false
+
+func _on_death_restart_pressed():
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _on_death_quit_pressed():
+	get_tree().paused = false
+	change_to_main_menu()
 
 func shake_camera(delta: float):
 	# Fade out the intensity over time

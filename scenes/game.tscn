@@ -58,6 +58,7 @@ color = Color(0.25882354, 0.25882354, 0.25882354, 1)
 polygon = PackedVector2Array(64, 56, 64, 320, 64, 584, 1088, 584, 1088, 56)
 
 [node name="Player" parent="." unique_id=118852400 instance=ExtResource("2_n47hv")]
+position = Vector2(322, 319)
 
 [node name="PlayerStats" type="Node" parent="." unique_id=275304734]
 script = ExtResource("3_stats")
@@ -144,6 +145,121 @@ offset_right = 718.0
 offset_bottom = -603.0
 grow_vertical = 0
 text = "Enemies to door: 0"
+
+[node name="PauseMenu" type="Control" parent="HUD" unique_id=-1588700025]
+visible = false
+modulate = Color(0, 0, 0, 0.7)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="PauseBackground" type="ColorRect" parent="HUD/PauseMenu" unique_id=-1588700024]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="PauseVBox" type="VBoxContainer" parent="HUD/PauseMenu" unique_id=-1588700023]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -150.0
+offset_right = 100.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="PauseTitle" type="Label" parent="HUD/PauseMenu/PauseVBox" unique_id=-1588700022]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="HUD/PauseMenu/PauseVBox" unique_id=-1588700021]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Resume"
+
+[node name="RestartButton" type="Button" parent="HUD/PauseMenu/PauseVBox" unique_id=-1588700020]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Restart"
+
+[node name="QuitButton" type="Button" parent="HUD/PauseMenu/PauseVBox" unique_id=-1588700019]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Quit to Menu"
+
+[node name="DeathScreen" type="Control" parent="HUD" unique_id=-588700025]
+visible = false
+modulate = Color(0, 0, 0, 0.8)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="DeathBackground" type="ColorRect" parent="HUD/DeathScreen" unique_id=-588700024]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0, 0, 0.85)
+
+[node name="DeathVBox" type="VBoxContainer" parent="HUD/DeathScreen" unique_id=-588700023]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -180.0
+offset_right = 150.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="DeathTitle" type="Label" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700022]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "YOU DIED"
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700021]
+layout_mode = 2
+text = "You reached floor 1"
+horizontal_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700020]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "Enter your name"
+
+[node name="SubmitScoreButton" type="Button" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700019]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Save Score"
+
+[node name="HighScoreDisplay" type="Label" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700018]
+visible = false
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "Score saved!"
+horizontal_alignment = 1
+
+[node name="DeathRestartButton" type="Button" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700017]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Restart"
+
+[node name="DeathQuitButton" type="Button" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700016]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Quit to Menu"
 
 [node name="RoomManager" type="Node" parent="." unique_id=35755925]
 script = ExtResource("4_room")

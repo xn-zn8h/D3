@@ -15,9 +15,14 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="D3 Zeta"
-run/main_scene="res://scenes/game.tscn"
+run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+HighScoreManager="*res://scripts/high_score_manager.gd"
+RoomManager="*res://scripts/room_manager.gd"
 
 [display]
 
