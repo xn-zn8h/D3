@@ -139,10 +139,10 @@ modulate = Color(0.9, 0.9, 0.9, 1)
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 462.0
-offset_top = -627.0
-offset_right = 718.0
-offset_bottom = -603.0
+offset_left = 76.0
+offset_top = -52.0
+offset_right = 332.0
+offset_bottom = -28.0
 grow_vertical = 0
 text = "Enemies to door: 0"
 
@@ -153,6 +153,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="PauseBackground" type="ColorRect" parent="HUD/PauseMenu" unique_id=-1588700024]
 layout_mode = 0
@@ -202,6 +204,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="DeathBackground" type="ColorRect" parent="HUD/DeathScreen" unique_id=-588700024]
 layout_mode = 0

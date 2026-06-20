@@ -14,10 +14,20 @@ func _ready():
 func load_high_scores():
 	var file = FileAccess.open(save_path, FileAccess.READ)
 	if file:
-		var data = JSON.parse_string(file.get_as_text())
-		if data and data is Array:
-			high_scores = data
+		var text = file.get_as_text()
 		file.close()
+		var json = JSON.new()
+		var error = json.parse(text)
+		if error == OK:
+			var data = json.data
+			if data and data is Array:
+				high_scores = data
+			else:
+				print("[HighScoreManager] Warning: Corrupted high score file, resetting.")
+				high_scores = []
+		else:
+			print("[HighScoreManager] Warning: Failed to parse high score JSON (error at line %d), resetting." % json.get_error_line())
+			high_scores = []
 	else:
 		# No file exists yet, start with empty list
 		high_scores = []
@@ -31,10 +41,11 @@ func save_high_scores():
 		file.close()
 
 # Add a new high score entry
-func add_high_score(score_name: String, score: int):
+func add_high_score(score_name: String, score: int, enemies_killed: int = 0):
 	var entry = {
 		"name": score_name,
 		"score": score,
+		"enemies_killed": enemies_killed,
 		"date": Time.get_datetime_string_from_system()
 	}
 	high_scores.append(entry)
@@ -64,5 +75,6 @@ func get_high_score_text() -> String:
 	for entry in high_scores:
 		var entry_name = entry.get("name", "Unknown")
 		var score = entry.get("score", 0)
-		text += "%s: %d\n" % [entry_name, score]
+		var killed = entry.get("enemies_killed", 0)
+		text += "%s: Floor %d (%d enemies)\n" % [entry_name, score, killed]
 	return text.trim_suffix("\n")

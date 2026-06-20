@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bcbhv85ti0qp"]
 
 [ext_resource type="Script" uid="uid://fqxe34u0rg0f" path="res://scripts/main_menu.gd" id="1_main_menu"]
-[ext_resource type="Texture2D" uid="uid://bemqaabo80iy4" path="res://assets/title.png" id="2_ekxnf"]
+[ext_resource type="Texture2D" uid="uid://5calpqcxbil5" path="res://assets/title.png" id="2_ekxnf"]
 
 [node name="MainMenu" type="Control" unique_id=38061888]
 layout_mode = 3
@@ -19,7 +19,31 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.1, 0.1, 0.15, 1)
+color = Color(0, 0, 0, 1)
+
+[node name="ColorRect" type="ColorRect" parent="ColorRect" unique_id=1323546444]
+layout_mode = 0
+offset_left = 454.0
+offset_top = 92.0
+offset_right = 535.0
+offset_bottom = 257.0
+color = Color(0.77, 0.77, 0.77, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="ColorRect" unique_id=1529043623]
+layout_mode = 0
+offset_left = 530.0
+offset_top = 84.0
+offset_right = 668.0
+offset_bottom = 185.0
+color = Color(0.65, 0.65, 0.65, 1)
+
+[node name="ColorRect3" type="ColorRect" parent="ColorRect" unique_id=1367024452]
+layout_mode = 0
+offset_left = 519.0
+offset_top = 178.0
+offset_right = 697.0
+offset_bottom = 264.0
+color = Color(0.61, 0.61, 0.61, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=970238969]
 layout_mode = 1
@@ -36,19 +60,61 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
+[node name="HighScoreLabel" type="Label" parent="VBoxContainer" unique_id=137868499]
+layout_mode = 2
+text = "No scores yet"
+
 [node name="StartButton" type="Button" parent="VBoxContainer" unique_id=1606168304]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 text = "Start Game"
 
-[node name="HighScoreLabel" type="Label" parent="VBoxContainer" unique_id=137868499]
-layout_mode = 2
-text = "No scores yet"
-
 [node name="HighScoresButton" type="Button" parent="VBoxContainer" unique_id=81118475]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 text = "High Scores"
+
+[node name="SettingsButton" type="Button" parent="VBoxContainer" unique_id=111111111]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Settings"
+
+[node name="SettingsPanel" type="Panel" parent="VBoxContainer" unique_id=222222222]
+visible = false
+layout_mode = 2
+
+[node name="SettingsVBox" type="VBoxContainer" parent="VBoxContainer/SettingsPanel" unique_id=333333333]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResolutionLabel" type="Label" parent="VBoxContainer/SettingsPanel/SettingsVBox" unique_id=444444444]
+layout_mode = 2
+text = "Resolution:"
+
+[node name="ResolutionOptionButton" type="OptionButton" parent="VBoxContainer/SettingsPanel/SettingsVBox" unique_id=555555555]
+layout_mode = 2
+
+[node name="ApplyButton" type="Button" parent="VBoxContainer/SettingsPanel/SettingsVBox" unique_id=666666666]
+layout_mode = 2
+text = "Apply"
+
+[node name="CreditsButton" type="Button" parent="VBoxContainer" unique_id=123456789]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Credits"
+
+[node name="CreditsLabel" type="Label" parent="VBoxContainer" unique_id=987654321]
+visible = false
+layout_mode = 2
+text = "Created by xn-zn8h
+Godot 4.6.3"
 
 [node name="ExitButton" type="Button" parent="VBoxContainer" unique_id=138155775]
 custom_minimum_size = Vector2(0, 50)
@@ -56,6 +122,6 @@ layout_mode = 2
 text = "Exit"
 
 [node name="Title" type="Sprite2D" parent="VBoxContainer" unique_id=218409484]
-position = Vector2(50.5, -90.5)
+position = Vector2(50.5, -109.5)
 scale = Vector2(0.6015625, 0.6015625)
 texture = ExtResource("2_ekxnf")

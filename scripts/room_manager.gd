@@ -35,6 +35,31 @@ var kill_threshold_percent: float = 0.75
 var max_floors: int = 5
 var rooms_per_floor: int = 0  # Calculated in _ready() as 3-4 constant
 
+# Room bounds
+const ROOM_WIDTH: float = 1088.0
+const ROOM_HEIGHT: float = 584.0
+const ROOM_MARGIN: float = 16.0 # Minimum distance from edge
+
+func get_room_bounds() -> Rect2:
+	return Rect2(
+		Vector2(ROOM_MARGIN, ROOM_MARGIN),
+		Vector2(ROOM_WIDTH - ROOM_MARGIN, ROOM_HEIGHT - ROOM_MARGIN)
+	)
+
+func clamp_to_room_bounds(position: Vector2) -> Vector2:
+	return Vector2(
+		clampf(position.x, ROOM_MARGIN, ROOM_WIDTH - ROOM_MARGIN),
+		clampf(position.y, ROOM_MARGIN, ROOM_HEIGHT - ROOM_MARGIN)
+	)
+
+func is_within_room_bounds(position: Vector2) -> bool:
+	return (
+		position.x >= ROOM_MARGIN and
+		position.x <= ROOM_WIDTH - ROOM_MARGIN and
+		position.y >= ROOM_MARGIN and
+		position.y <= ROOM_HEIGHT - ROOM_MARGIN
+	)
+
 func _ready():
 	current_floor = 1
 	current_room = 0

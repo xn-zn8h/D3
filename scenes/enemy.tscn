@@ -10,7 +10,7 @@ size = Vector2(27, 22.265625)
 resource_local_to_scene = true
 shader = ExtResource("1_6icbm")
 shader_parameter/poly_color = Color(0.3731278, 0.5853351, 0.38155708, 1)
-shader_parameter/flash_color = Color(1, 1, 1, 1)
+shader_parameter/flash_color = Color(1, 0.43917835, 0.62782896, 1)
 shader_parameter/flash_modifier = 0.0
 
 [sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_nupch"]

@@ -38,6 +38,7 @@ var is_transitioning: bool = false  # Guard against rapid room transitions
 var urn_list: Array = []  # Track active urns in current room
 var door_list: Array = []  # Track active doors in current room
 var current_score: int = 0  # Score metric (current floor)
+var enemies_killed: int = 0  # Total enemies defeated
 
 # Inventory system
 var inventory: Dictionary = {}  # item_id -> count
@@ -49,10 +50,14 @@ func _ready():
 	start_pos = Vector2(screen_size.x/2, screen_size.y/2)
 	player.setup(start_pos)
 	# Wire up stat manager to player
-	player.stats = player_stats
+	if player_stats:
+		player.stats = player_stats
+	else:
+		push_error("[Game] PlayerStats node not found! Player will use default stats.")
 	# Connect signals
-	player_stats.player_died.connect(_on_player_died)
-	player_stats.health_changed.connect(_on_health_changed)
+	if player_stats:
+		player_stats.player_died.connect(_on_player_died)
+		player_stats.health_changed.connect(_on_health_changed)
 	room_manager.key_received.connect(_on_key_received)
 	room_manager.floor_changed.connect(_on_floor_changed)
 	room_manager.room_changed.connect(_on_room_changed)
@@ -336,13 +341,14 @@ func _spawn_doors():
 		door_list.append(door_next)
 
 func _on_door_entered(direction: String):
+	# GUARD: Prevent door entry during active transitions
+	# This prevents doors from being marked triggered when setup_room returns early
+	if is_transitioning:
+		return
+	
 	var success = room_manager.enter_door(direction)
 	if success:
-		# Mark the triggering door as triggered so it can't be reused
-		for door in door_list:
-			if is_instance_valid(door) and door.door_direction == direction and not door.triggered:
-				door.mark_triggered()
-				break
+		# No need to mark doors as triggered - they're cleared by setup_room() anyway
 		setup_room()
 		# Move player to door position based on direction entered
 		match direction:
@@ -448,6 +454,10 @@ func _on_health_changed(current_health: int, max_health: int):
 	hud_health_text.text = "HP: %d/%d" % [current_health, max_health]
 
 func _create_inventory_hud():
+	# Prevent duplicate inventory panel creation
+	if inventory_panel and inventory_panel.is_inside_tree():
+		return
+	
 	# Create panel for inventory
 	inventory_panel = Panel.new()
 	inventory_panel.name = "InventoryPanel"
@@ -562,7 +572,7 @@ func _on_submit_score_pressed():
 	var score_name = name_input.text.strip_edges()
 	if score_name.is_empty():
 		score_name = "Anonymous"
-	HighScoreManager.add_high_score(score_name, current_score)
+	HighScoreManager.add_high_score(score_name, current_score, enemies_killed)
 	high_score_display.visible = true
 	high_score_display.text = "Score saved!"
 	submit_score_button.visible = false
@@ -602,5 +612,6 @@ func on_enemy_destroyed(enemy):
 	var index = enemy_list.find(enemy)
 	if index != -1:
 		enemy_list.remove_at(index)
+	enemies_killed += 1
 	room_manager.enemy_defeated()
 	update_enemy_counter_hud()

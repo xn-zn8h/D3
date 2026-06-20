@@ -8,6 +8,7 @@ var pickup_cooldown: float = 0.0
 var float_offset: float = 0.0
 var float_speed: float = 2.0
 var float_amplitude: float = 5.0
+var base_position: Vector2 = Vector2.ZERO  # Store initial position for smooth bobbing
 
 # Emitted when the item is picked up
 signal item_picked_up(item_data: Resource)
@@ -16,12 +17,14 @@ func _ready():
 	# Set up collision layer (item layer)
 	area_entered.connect(_on_area_entered)
 	body_entered.connect(_on_body_entered)
+	# Store base position for smooth floating animation
+	base_position = position
 
 func _process(delta):
-	# Floating animation
+	# Floating animation using smooth sine wave relative to base position
+	# This prevents position drift and creates a natural bobbing effect
 	float_offset += float_speed * delta
-	# Gentle bobbing motion
-	position.y += sin(float_offset) * float_amplitude * delta
+	position.y = base_position.y + sin(float_offset) * float_amplitude
 	
 	# Cooldown timer
 	if pickup_cooldown > 0:

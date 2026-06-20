@@ -26,6 +26,7 @@ var push_timer: float = 0.0
 var stats: Node = null # Reference to player_stats manager
 var is_invulnerable: bool = false
 var invulnerability_timer: float = 0.0
+var attack_cone_visible: bool = false
 
 # Reference
 @onready var body_lr: Polygon2D = $BodyLR
@@ -49,6 +50,24 @@ func _ready():
 	charge_bar.min_value = 0.0
 	charge_bar.max_value = ranged_charge_time
 	charge_bar.value = 0.0
+	
+	# Create attack cone visualization for melee attacks
+	var attack_cone = Polygon2D.new()
+	attack_cone.name = "AttackCone"
+	var cone_points = PackedVector2Array()
+	var cone_angle: float = deg_to_rad(180.0) # 180-degree cone
+	var cone_length: float = 64.0 # Match sword range
+	var segments: int = 20
+	# Create sector shape
+	cone_points.append(Vector2(0, 0)) # Center point
+	for i in range(segments + 1):
+		var angle = -cone_angle / 2.0 + (cone_angle * i / segments)
+		cone_points.append(Vector2(cos(angle) * cone_length, sin(angle) * cone_length))
+	cone_points.append(Vector2(0, 0)) # Close the shape
+	attack_cone.polygon = cone_points
+	attack_cone.color = Color(1.0, 0.8, 0.2, 0.4) # Golden semi-transparent
+	attack_cone.visible = false
+	sword_pivot.add_child(attack_cone)
 
 func _physics_process(delta):
 	velocity = Vector2.ZERO # The player's movement vector.
@@ -86,6 +105,8 @@ func _physics_process(delta):
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * speed
 		move_trail_effect.emitting = true # Play movement trail effect
+	else:
+		move_trail_effect.emitting = false # Stop trail when not moving
 	update_sword_attack(delta)
 	# Handle body_lr
 	update_body_lr()
@@ -148,6 +169,11 @@ func attack():
 	hit_enemies.clear()
 	sword_pivot.rotation = deg_to_rad(-110.0)
 	set_push(Vector2.RIGHT.rotated(body_rotate.rotation), 90.0, 0.1)
+	# Show attack cone visualization
+	var attack_cone = sword_pivot.get_node_or_null("AttackCone")
+	if attack_cone:
+		attack_cone.visible = true
+		attack_cone.modulate.a = 1.0
 	# Play attack sound
 	audio_player.play()
 	apply_sword_damage()
@@ -169,8 +195,17 @@ func update_sword_attack(delta: float):
 		var progress = 1.0 - (attack_time_left / attack_duration)
 		sword_pivot.rotation = deg_to_rad(lerp(-110.0, 70.0, progress))
 		apply_sword_damage()
+		# Fade attack cone
+		var attack_cone = sword_pivot.get_node_or_null("AttackCone")
+		if attack_cone:
+			attack_cone.modulate.a = lerp(1.0, 0.0, progress)
 	else:
 		sword_pivot.rotation = 0.0
+		# Hide attack cone when attack ends
+		var attack_cone = sword_pivot.get_node_or_null("AttackCone")
+		if attack_cone:
+			attack_cone.visible = false
+			attack_cone.modulate.a = 0.0
 
 func apply_sword_damage():
 	for body in sword_hitbox.get_overlapping_bodies():

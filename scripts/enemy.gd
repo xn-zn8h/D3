@@ -19,6 +19,11 @@ signal enemy_destroyed(enemy)
 @export var electrified_damage_multiplier: float = 3.5 # 3.5x damage multiplier
 @export var electrified_backstab_multiplier: float = 5.0 # 5x damage for backstab
 
+# Aggro range
+@export var aggro_range: float = 400.0 # Maximum distance to chase player
+@export var aggro_recovery_range: float = 500.0 # Distance to resume chasing after losing aggro
+var has_aggro: bool = true
+
 enum State { IDLE, TELEGRAPH, DASH, COOLDOWN }
 
 var player: CharacterBody2D
@@ -66,10 +71,11 @@ func _create_telegraph_visuals():
 	telegraph_box.visible = false
 	add_child(telegraph_box)
 	
-	# Telegraph arrows - ">>" above enemy
+	# Telegraph arrows - ">>>" above enemy
 	telegraph_arrows = Label.new()
 	telegraph_arrows.text = ">>> "
 	telegraph_arrows.position = Vector2(0, -40)
+	telegraph_arrows.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	telegraph_arrows.visible = false
 	add_child(telegraph_arrows)
 	
@@ -84,15 +90,30 @@ func _create_electrified_visuals():
 	# Electric aura around enemy when electrified
 	var electric_aura = ColorRect.new()
 	electric_aura.name = "ElectricAura"
-	electric_aura.color = Color(0.3, 0.5, 1.0, 0.3) # Blue semi-transparent
+	electric_aura.color = Color(0.3, 0.5, 1.0, 0.6) # Blue semi-transparent, more visible
 	electric_aura.size = Vector2(48, 64)
 	electric_aura.position = Vector2(-24, -32)
 	electric_aura.visible = false
 	add_child(electric_aura)
 
+# Pulsate electric aura for visual feedback
+var electrified_pulse_timer: float = 0.0
+func _process_electrified_visuals(delta: float):
+	if is_electrified and has_node("ElectricAura"):
+		electrified_pulse_timer += delta * 15.0 # Fast pulse rate
+		var pulse = sin(electrified_pulse_timer) * 0.5 + 0.5 # 0 to 1 range
+		$ElectricAura.color.a = lerp(0.3, 0.8, pulse) # Pulse alpha between 0.3-0.8
+		# Slight size pulse for more visual impact
+		var size_pulse = lerp(44, 52, pulse)
+		$ElectricAura.size = Vector2(size_pulse, size_pulse * 1.33)
+		$ElectricAura.position = Vector2(-$ElectricAura.size.x / 2, -$ElectricAura.size.y / 2)
+
 func setup(pos: Vector2, _player: CharacterBody2D):
 	position = pos
 	player = _player
+
+func _process(delta):
+	_process_electrified_visuals(delta)
 
 func _physics_process(delta):
 	if not player:
@@ -124,6 +145,19 @@ func _physics_process(delta):
 				_transition_to(State.IDLE)
 
 func _chase_player(delta):
+	var distance_to_player = global_position.distance_to(player.global_position)
+	
+	# Lose aggro if player is too far
+	if not has_aggro and distance_to_player > aggro_recovery_range:
+		return
+	if distance_to_player > aggro_range:
+		has_aggro = false
+		return
+	
+	# Gain aggro if player is close
+	if distance_to_player <= aggro_range:
+		has_aggro = true
+	
 	var dir = (player.global_position - global_position).normalized()
 	facing_direction = dir
 	position += dir * delta * speed
