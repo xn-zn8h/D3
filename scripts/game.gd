@@ -46,6 +46,9 @@ var inventory_panel: Control = null
 var inventory_vbox: VBoxContainer = null
 
 func _ready():
+	# Reset all game state to initial values (handles death -> menu -> restart properly)
+	reset_game_state()
+	
 	var screen_size = get_viewport_rect().size
 	start_pos = Vector2(screen_size.x/2, screen_size.y/2)
 	player.setup(start_pos)
@@ -377,6 +380,28 @@ func _on_door_entered(direction: String):
 func _on_item_picked_up(item_data: Resource):
 	# Apply item stats to player
 	if item_data:
+		# Handle consumable items (like health tonic) separately
+		if item_data is ItemData and item_data.item_id == "health_tonic":
+			var healed = player_stats.heal(15)
+			if healed > 0:
+				show_item_notification(item_data)
+			return
+		# Handle Magic Stick - reduces charge time
+		if item_data is ItemData and item_data.item_id == "magic_stick":
+			player.charge_time_reduction = 0.05  # 5% reduction in charge time
+			item_data.apply_to_stats(player_stats)
+			inventory["magic_stick"] = 1
+			update_inventory("magic_stick", 1)
+			show_item_notification(item_data)
+			return
+		# Handle New Jordans - increases movement speed by 5%
+		if item_data is ItemData and item_data.item_id == "new_jordans":
+			player.speed *= 1.05  # 5% speed increase
+			item_data.apply_to_stats(player_stats)
+			inventory["new_jordans"] = 1
+			update_inventory("new_jordans", 1)
+			show_item_notification(item_data)
+			return
 		item_data.apply_to_stats(player_stats)
 		# Track in inventory
 		var item_id = item_data.item_id if item_data is ItemData else "unknown"
@@ -440,6 +465,8 @@ func _on_player_died():
 	death_screen.visible = true
 	# CRITICAL: Set death screen to always process so UI works when tree is paused
 	death_screen.process_mode = Node.PROCESS_MODE_ALWAYS
+	# Ensure all death screen text is white for visibility
+	_style_death_screen_white()
 	death_score_label.text = "You reached floor %d" % current_score
 	name_input.text = ""
 	name_input.grab_focus()
@@ -452,6 +479,27 @@ func _on_health_changed(current_health: int, max_health: int):
 	hud_health_bar.max_value = max_health
 	hud_health_bar.value = current_health
 	hud_health_text.text = "HP: %d/%d" % [current_health, max_health]
+
+func _style_death_screen_white():
+	"""Ensure all death screen text elements use white font for visibility. Buttons/input grey."""
+	var white = Color.WHITE
+	var gray = Color(0.6, 0.6, 0.6, 1)
+	if death_score_label:
+		death_score_label.add_theme_color_override("font_color", white)
+	if name_input:
+		name_input.add_theme_color_override("font_color", gray)
+		name_input.add_theme_color_override("placeholder_font_color", gray)
+	if submit_score_button:
+		submit_score_button.add_theme_color_override("font_color", gray)
+	if high_score_display:
+		high_score_display.add_theme_color_override("font_color", white)
+	# Also style restart/quit buttons (not @onready, so lookup directly)
+	var restart_btn = $HUD/DeathScreen/DeathVBox/DeathRestartButton
+	var quit_btn = $HUD/DeathScreen/DeathVBox/DeathQuitButton
+	if restart_btn:
+		restart_btn.add_theme_color_override("font_color", gray)
+	if quit_btn:
+		quit_btn.add_theme_color_override("font_color", gray)
 
 func _create_inventory_hud():
 	# Prevent duplicate inventory panel creation
@@ -533,8 +581,6 @@ func _input(event):
 		return
 	
 	if is_game_over and event is InputEventKey and event.pressed:
-		if event.keycode == KEY_R:
-			get_tree().reload_current_scene()
 		if event.keycode == KEY_ESCAPE:
 			# Allow ESC to quit to main menu from game over
 			change_to_main_menu()
@@ -564,6 +610,35 @@ func _on_restart_button_pressed():
 func _on_quit_button_pressed():
 	get_tree().paused = false
 	change_to_main_menu()
+
+func reset_game_state():
+	# Reset player stats
+	player_stats.reset_stats()
+	# Reset player-specific modifiers
+	player.speed = 360.0
+	player.charge_time_reduction = 0.0
+	# Reset game tracking
+	current_score = 0
+	enemies_killed = 0
+	inventory.clear()
+	is_game_over = false
+	is_paused = false
+	is_transitioning = false
+	# Clear entity lists
+	for enemy in enemy_list:
+		if is_instance_valid(enemy):
+			enemy.queue_free()
+	enemy_list.clear()
+	for urn in urn_list:
+		if is_instance_valid(urn):
+			urn.queue_free()
+	urn_list.clear()
+	for door in door_list:
+		if is_instance_valid(door):
+			door.queue_free()
+	door_list.clear()
+	# Reset room manager (floor, room layout, etc.)
+	room_manager.reset_room_manager()
 
 func change_to_main_menu():
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")

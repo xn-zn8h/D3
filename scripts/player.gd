@@ -5,11 +5,18 @@ extends CharacterBody2D
 @export var attack_duration: float = 0.12
 @export var melee_cooldown: float = 0.12
 @export var ranged_cooldown: float = 0.45
-@export var ranged_charge_time: float = 0.25
-@export var charge_delay: float = 0.1 # Delay before charge bar appears
+@export var ranged_charge_time: float = 0.5
+@export var charge_delay: float = 0.15 # Delay before charge bar appears
+@export var charge_time_reduction: float = 0.0 # Percentage reduction from items (0-1)
 @export var ranged_projectile_speed: float = 800.0
 @export var lr_flag: bool = true # Enable body left right animation
 @export var rotate_flag: bool = true # Enable body rotation
+
+# Dodge roll settings
+@export var dodge_speed: float = 800.0
+@export var dodge_duration: float = 0.25
+@export var dodge_cooldown: float = 0.5
+@export var dodge_invulnerability: float = 0.3
 
 var screen_size # Size of the game window.
 var lr: bool = true # Default face right
@@ -27,6 +34,14 @@ var stats: Node = null # Reference to player_stats manager
 var is_invulnerable: bool = false
 var invulnerability_timer: float = 0.0
 var attack_cone_visible: bool = false
+var collision_cooldown: float = 0.5 # Time between collision damage instances
+var collision_cooldown_timer: float = 0.0
+
+# Dodge state
+var is_dodging: bool = false
+var dodge_timer: float = 0.0
+var dodge_cooldown_timer: float = 0.0
+var dodge_direction: Vector2 = Vector2.ZERO
 
 # Reference
 @onready var body_lr: Polygon2D = $BodyLR
@@ -70,6 +85,16 @@ func _ready():
 	sword_pivot.add_child(attack_cone)
 
 func _physics_process(delta):
+	# Handle dodge cooldown
+	if dodge_cooldown_timer > 0:
+		dodge_cooldown_timer -= delta
+	
+	# Handle dodge movement
+	if is_dodging:
+		_dodge_process(delta)
+		move_and_slide()
+		return
+	
 	velocity = Vector2.ZERO # The player's movement vector.
 	# Movement input
 	if Input.is_action_pressed("move_right"):
@@ -80,6 +105,9 @@ func _physics_process(delta):
 		velocity.y += 1
 	if Input.is_action_pressed("move_up"):
 		velocity.y -= 1
+	# Dodge input
+	if Input.is_action_just_pressed("dodge") and dodge_cooldown_timer <= 0:
+		_start_dodge()
 	# Attack input - Quick tap = melee, Hold = ranged
 	if Input.is_action_just_pressed("shot") and not is_shot_cd:
 		is_charging_shot = true
@@ -87,10 +115,11 @@ func _physics_process(delta):
 		ranged_shot_fired = false
 	if is_charging_shot and not is_shot_cd:
 		shot_hold_time += delta
+		var effective_charge_time = ranged_charge_time * (1.0 - charge_time_reduction)
 		if shot_hold_time >= charge_delay:
 			charge_bar.visible = true
 			charge_bar.value = shot_hold_time - charge_delay
-		if shot_hold_time >= ranged_charge_time and not ranged_shot_fired:
+		if shot_hold_time >= effective_charge_time and not ranged_shot_fired:
 			fire_ranged_attack()
 			ranged_shot_fired = true
 			charge_bar.visible = false
@@ -121,6 +150,60 @@ func _physics_process(delta):
 	position.x = clamp(position.x, 0, screen_size.x)
 	position.y = clamp(position.y, 0, screen_size.y)
 	move_and_slide()
+	# Handle collision cooldown timer
+	if collision_cooldown_timer > 0:
+		collision_cooldown_timer -= delta
+	# Check for enemy collision damage from bumping
+	for i in range(get_slide_collision_count()):
+		var collision = get_slide_collision(i)
+		var body = collision.get_collider()
+		if body.is_in_group("enemy") and collision_cooldown_timer <= 0:
+			var knockback_dir = (global_position - body.global_position).normalized()
+			take_damage(body.damage, knockback_dir)
+			collision_cooldown_timer = collision_cooldown
+
+# Dodge roll mechanics
+func _start_dodge():
+	# Determine dodge direction: movement input first, then facing direction
+	var input_dir = Vector2.ZERO
+	if Input.is_action_pressed("move_right"):
+		input_dir.x += 1
+	if Input.is_action_pressed("move_left"):
+		input_dir.x -= 1
+	if Input.is_action_pressed("move_down"):
+		input_dir.y += 1
+	if Input.is_action_pressed("move_up"):
+		input_dir.y -= 1
+	
+	if input_dir.length() > 0:
+		dodge_direction = input_dir.normalized()
+	else:
+		# Dodge in facing direction (based on body_lr orientation)
+		dodge_direction = Vector2.RIGHT if lr else Vector2.LEFT
+	
+	is_dodging = true
+	dodge_timer = dodge_duration
+	# Grant invulnerability during dodge
+	is_invulnerable = true
+	invulnerability_timer = dodge_invulnerability
+	# Start cooldown after dodge
+	dodge_cooldown_timer = dodge_cooldown
+	# Speed up trail effect during dodge
+	move_trail_effect.emitting = true
+
+func _dodge_process(delta: float):
+	dodge_timer -= delta
+	# Apply dodge velocity
+	velocity = dodge_direction * dodge_speed
+	# Gradually reduce dodge speed towards end of dodge
+	if dodge_timer < dodge_duration * 0.3:
+		var fade_factor = dodge_timer / (dodge_duration * 0.3)
+		velocity = dodge_direction * dodge_speed * fade_factor
+	
+	# End dodge when timer expires
+	if dodge_timer <= 0:
+		is_dodging = false
+		velocity = Vector2.ZERO
 
 func _input(event):
 	if event is InputEventMouseMotion:

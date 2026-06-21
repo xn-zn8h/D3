@@ -7,8 +7,8 @@
 [resource]
 item_id = "health_tonic"
 display_name = "Health Tonic"
-description = "A restorative tonic that boosts vitality."
+description = "A restorative tonic that restores vitality."
 attack_mod = 0
-max_health_mod = 20
+max_health_mod = 0
 armor_mod = 0
 rarity = 0

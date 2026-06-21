@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+resource/bins/16 = {
+"resource/1D": &load("res://shader/pixelate.gdshader")
+}
+resource/1D = Shader("16")

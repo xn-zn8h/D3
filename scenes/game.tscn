@@ -198,7 +198,6 @@ layout_mode = 2
 text = "Quit to Menu"
 
 [node name="DeathScreen" type="Control" parent="HUD" unique_id=-588700025]
-visible = false
 modulate = Color(0, 0, 0, 0.8)
 layout_mode = 3
 anchors_preset = 15
@@ -230,39 +229,47 @@ alignment = 1
 [node name="DeathTitle" type="Label" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700022]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "YOU DIED"
 horizontal_alignment = 1
 
 [node name="ScoreLabel" type="Label" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700021]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "You reached floor 1"
 horizontal_alignment = 1
 
 [node name="NameInput" type="LineEdit" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700020]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/placeholder_font_color = Color(0.7, 0.7, 0.7, 1)
 placeholder_text = "Enter your name"
 
 [node name="SubmitScoreButton" type="Button" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700019]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Save Score"
 
 [node name="HighScoreDisplay" type="Label" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700018]
 visible = false
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Score saved!"
 horizontal_alignment = 1
 
 [node name="DeathRestartButton" type="Button" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700017]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Restart"
 
 [node name="DeathQuitButton" type="Button" parent="HUD/DeathScreen/DeathVBox" unique_id=-588700016]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Quit to Menu"
 
 [node name="RoomManager" type="Node" parent="." unique_id=35755925]

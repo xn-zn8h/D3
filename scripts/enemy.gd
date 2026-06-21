@@ -4,7 +4,7 @@ signal enemy_destroyed(enemy)
 
 @export var health: int = 100
 @export var speed: float = 60.0
-@export var damage: int = 25
+@export var damage: int = 10
 
 # Dash attack properties
 @export var dash_speed: float = 800.0
@@ -16,8 +16,8 @@ signal enemy_destroyed(enemy)
 
 # Electrified status effect
 @export var electrified_duration: float = 5.0 # How long electrified lasts
-@export var electrified_damage_multiplier: float = 3.5 # 3.5x damage multiplier
-@export var electrified_backstab_multiplier: float = 5.0 # 5x damage for backstab
+@export var electrified_damage_multiplier: float = 5.0 # 5x damage multiplier
+@export var electrified_backstab_multiplier: float = 7.5 # 7.5x damage for backstab
 
 # Aggro range
 @export var aggro_range: float = 400.0 # Maximum distance to chase player
@@ -41,6 +41,12 @@ var dash_has_hit: bool = false
 # Electrified state
 var is_electrified: bool = false
 var electrified_timer: float = 0.0
+
+# Electrified draw state
+var _electrified_aura_color: Color = Color(0.3, 0.5, 1.0, 0.5)
+var _electrified_aura_radius: float = 32.0
+var _electrified_ring_color: Color = Color(0.6, 0.7, 1.0, 0.3)
+var _electrified_ring_radius: float = 36.0
 
 # Facing direction for backstab detection
 var facing_direction: Vector2 = Vector2.RIGHT
@@ -87,33 +93,34 @@ func _create_telegraph_visuals():
 	add_child(dash_path_line)
 
 func _create_electrified_visuals():
-	# Electric aura around enemy when electrified
-	var electric_aura = ColorRect.new()
+	# Create electric aura node with dedicated script to avoid shaking when parent moves
+	var electric_aura = preload("res://scripts/electric_aura.gd").new()
 	electric_aura.name = "ElectricAura"
-	electric_aura.color = Color(0.3, 0.5, 1.0, 0.6) # Blue semi-transparent, more visible
-	electric_aura.size = Vector2(48, 64)
-	electric_aura.position = Vector2(-24, -32)
 	electric_aura.visible = false
 	add_child(electric_aura)
-
-# Pulsate electric aura for visual feedback
-var electrified_pulse_timer: float = 0.0
-func _process_electrified_visuals(delta: float):
-	if is_electrified and has_node("ElectricAura"):
-		electrified_pulse_timer += delta * 15.0 # Fast pulse rate
-		var pulse = sin(electrified_pulse_timer) * 0.5 + 0.5 # 0 to 1 range
-		$ElectricAura.color.a = lerp(0.3, 0.8, pulse) # Pulse alpha between 0.3-0.8
-		# Slight size pulse for more visual impact
-		var size_pulse = lerp(44, 52, pulse)
-		$ElectricAura.size = Vector2(size_pulse, size_pulse * 1.33)
-		$ElectricAura.position = Vector2(-$ElectricAura.size.x / 2, -$ElectricAura.size.y / 2)
+	
+	# Lightning particles
+	var particles = GPUParticles2D.new()
+	particles.name = "ElectricParticles"
+	particles.one_shot = false
+	particles.amount = 15
+	particles.lifetime = 0.4
+	particles.emitting = false
+	particles.visible = false
+	# Particle process material
+	var proc_mat = ParticleProcessMaterial.new()
+	proc_mat.initial_velocity_min = 30.0
+	proc_mat.initial_velocity_max = 80.0
+	proc_mat.scale_min = 1.0
+	proc_mat.scale_max = 3.0
+	proc_mat.angle_min = -90
+	proc_mat.angle_max = 90
+	particles.process_material = proc_mat
+	add_child(particles)
 
 func setup(pos: Vector2, _player: CharacterBody2D):
 	position = pos
 	player = _player
-
-func _process(delta):
-	_process_electrified_visuals(delta)
 
 func _physics_process(delta):
 	if not player:
@@ -235,13 +242,20 @@ func _transition_to(new_state: State):
 func apply_electrified(duration: float):
 	is_electrified = true
 	electrified_timer = duration
-	$ElectricAura.visible = true
+	if has_node("ElectricAura"):
+		$ElectricAura.visible = true
+		$ElectricAura.activate()
+	if has_node("ElectricParticles"):
+		$ElectricParticles.visible = true
 
 func _remove_electrified():
 	is_electrified = false
 	electrified_timer = 0.0
 	if has_node("ElectricAura"):
-		$ElectricAura.visible = false
+		$ElectricAura.deactivate()
+	if has_node("ElectricParticles"):
+		$ElectricParticles.emitting = false
+		$ElectricParticles.visible = false
 
 func get_hit(incoming_damage: int, bullet_trans: Transform2D):
 	var final_damage = incoming_damage

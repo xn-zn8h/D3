@@ -70,6 +70,16 @@ func _ready():
 	floor_layout = {}
 	generate_floor_layout(current_floor)
 
+func reset_room_manager():
+	# Reset all room manager state for a fresh game
+	current_floor = 1
+	current_room = 0
+	total_enemies_on_floor = enemies_per_room * rooms_per_floor
+	enemies_defeated_on_floor = 0
+	player_has_key = false
+	floor_layout = {}
+	generate_floor_layout(current_floor)
+
 func generate_floor_layout(floor_number: int):
 	# Generate 2D grid layout with 3-4 connected rooms
 	# All rooms are connected - if no room exists on a wall, no door spawns there
@@ -161,12 +171,11 @@ func generate_floor_layout(floor_number: int):
 		for j in range(enemy_count):
 			enemy_positions.append(Vector2(randf_range(150, 900), randf_range(150, 500)))
 		
-		# Generate random urn positions (1-2 urns depending on floor)
-		var urn_count = 1
-		if floor_number >= 2 and floor_number <= 3:
-			urn_count = randi() % 2 + 1  # 1-2 urns
-		elif floor_number >= 4:
-			urn_count = randi() % 2 + 2  # 2-3 urns
+		# Generate random urn positions (urns are rare - only 30% chance per room)
+		var urn_count = 0
+		if randf() < 0.3:  # 30% chance to spawn urns
+			if floor_number >= 1:
+				urn_count = 1  # Always just 1 urn when they do spawn
 		
 		var urn_positions = []
 		for j in range(urn_count):

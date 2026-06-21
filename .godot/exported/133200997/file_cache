@@ -1,0 +1,11 @@
+res://scenes/blood_particle.tscn::d56416290049c7d7c74083b862078cb5::1781743993::res://.godot/exported/133200997/export-9e80ccf502eba4843eb70e50c0c0a8c5-blood_particle.scn
+res://scenes/bullet.tscn::7013c85f9425d5b38194accae4839053::1781914428::res://.godot/exported/133200997/export-6d8e6ff1e6f20a36e0402d27c623c86c-bullet.scn
+res://scenes/bullet_hit_sound.tscn::58b9838fb8579c42dd107216f4c8b5d2::1781801259::res://.godot/exported/133200997/export-b828539c85e5c34ed09e49376fbafdf8-bullet_hit_sound.scn
+res://scenes/bullet_particle.tscn::621b2026c8f00e6a843288b815127656::1781743993::res://.godot/exported/133200997/export-4575094dc8194a0e8b4804e5ba7acf3e-bullet_particle.scn
+res://scenes/door.tscn::5a77a6cbba3c12d20939e9c2c78d6d25::1781946109::res://.godot/exported/133200997/export-3370694a3d56567dea5c3bf0058a536d-door.scn
+res://scenes/enemy.tscn::b2035fcce188e2a65e5c1a335fd6978e::1781957259::res://.godot/exported/133200997/export-a930820ec0ab16db6719aff4daa500f9-enemy.scn
+res://scenes/game.tscn::8bdf816c9255b9ec42384b3dba052f51::1781977447::res://.godot/exported/133200997/export-c2a7af834e91ff64325daddf58e45dc0-game.scn
+res://scenes/item_drop.tscn::2a09caa37a03606f81f61634de91291c::1781902259::res://.godot/exported/133200997/export-6854fbde63de3b3b0e627318b8761d9a-item_drop.scn
+res://scenes/main_menu.tscn::139819e756d7713752662911534899c3::1782000806::res://.godot/exported/133200997/export-ea5c6ad4629af728dc514cefde332394-main_menu.scn
+res://scenes/player.tscn::d77a3a54253cec2c1983e79a41d6e577::1781900897::res://.godot/exported/133200997/export-234fb6894ec6226e856ab7f825500d3d-player.scn
+res://scenes/urn.tscn::68d82935582dfa406ea131257d6e2a95::1781902259::res://.godot/exported/133200997/export-48a7ebcb1a1f70abf3625b727ffacd3c-urn.scn

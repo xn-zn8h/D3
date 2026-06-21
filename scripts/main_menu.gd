@@ -4,15 +4,15 @@ extends Control
 # Displays start button, high score, credits, settings, and exit option
 
 @onready var start_button: Button = $VBoxContainer/StartButton
-@onready var high_score_label: Label = $VBoxContainer/HighScoreLabel
+@onready var high_score_label: Label = $HighScoreLabel
 @onready var exit_button: Button = $VBoxContainer/ExitButton
 @onready var high_scores_button: Button = $VBoxContainer/HighScoresButton
 @onready var credits_button: Button = $VBoxContainer/CreditsButton
 @onready var credits_label: Label = $VBoxContainer/CreditsLabel
 @onready var settings_button: Button = $VBoxContainer/SettingsButton
-@onready var settings_panel: Panel = $VBoxContainer/SettingsPanel
-@onready var resolution_option_button: OptionButton = $VBoxContainer/SettingsPanel/SettingsVBox/ResolutionOptionButton
-@onready var apply_button: Button = $VBoxContainer/SettingsPanel/SettingsVBox/ApplyButton
+@onready var settings_panel: Panel = $SettingsPanel
+@onready var resolution_option_button: OptionButton = $SettingsPanel/SettingsVBox/ResolutionOptionButton
+@onready var apply_button: Button = $SettingsPanel/SettingsVBox/ApplyButton
 
 # Available resolutions
 var resolutions = [
@@ -28,6 +28,7 @@ var showing_full_scores: bool = false
 
 func _ready():
 	update_high_score_display()
+	populate_resolution_dropdown()
 	load_settings()
 	# Connect button signals
 	start_button.pressed.connect(_on_start_button_pressed)
@@ -37,13 +38,18 @@ func _ready():
 	settings_button.pressed.connect(_on_settings_button_pressed)
 	apply_button.pressed.connect(_on_apply_button_pressed)
 
+func populate_resolution_dropdown():
+	# Add resolution options to the dropdown
+	for resolution in resolutions:
+		var res_text = "%dx%d" % [resolution.x, resolution.y]
+		resolution_option_button.add_item(res_text)
+
 func update_high_score_display():
 	var top_score = HighScoreManager.get_top_score()
 	if top_score > 0:
 		high_score_label.text = "Best Score: %d" % top_score
 	else:
 		high_score_label.text = "No scores yet"
-	showing_full_scores = false
 
 func _on_start_button_pressed():
 	# Load the game scene
@@ -79,6 +85,8 @@ func _on_apply_button_pressed():
 
 func load_settings():
 	# Load saved settings from JSON file
+	if not FileAccess.file_exists(SETTINGS_FILE):
+		return
 	var file = FileAccess.open(SETTINGS_FILE, FileAccess.READ)
 	if file:
 		var json = JSON.new()
