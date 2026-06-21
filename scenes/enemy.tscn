@@ -330,6 +330,8 @@ collision_layer = 2
 collision_mask = 3
 motion_mode = 1
 script = ExtResource("1_cd24m")
+speed = 70.0
+dash_cooldown_min = 0.75
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1698210472]
 light_mask = 3

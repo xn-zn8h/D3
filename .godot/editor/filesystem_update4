@@ -1,0 +1,5 @@
+res://scenes/game.tscn
+res://shader/bot_flash.gdshader
+res://scenes/enemy.tscn
+res://scenes/bullet.tscn
+res://scenes/main_menu.tscn

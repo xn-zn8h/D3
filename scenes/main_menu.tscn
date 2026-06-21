@@ -36,6 +36,36 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
+[node name="Title" type="Sprite2D" parent="VBoxContainer" unique_id=218409484]
+z_index = 1
+position = Vector2(50.5, -109.5)
+scale = Vector2(0.6015625, 0.6015625)
+texture = ExtResource("2_ekxnf")
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Title" unique_id=1323546444]
+z_index = -1
+offset_left = -192.83118
+offset_top = -110.545456
+offset_right = -18.285706
+offset_bottom = 135.48053
+color = Color(0.77, 0.77, 0.77, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="VBoxContainer/Title" unique_id=1529043623]
+z_index = -1
+offset_left = -73.14288
+offset_top = -137.14287
+offset_right = 164.57147
+offset_bottom = 19.116867
+color = Color(0.65, 0.65, 0.65, 1)
+
+[node name="ColorRect3" type="ColorRect" parent="VBoxContainer/Title" unique_id=1367024452]
+z_index = -1
+offset_left = -38.233784
+offset_top = 14.129864
+offset_right = 172.88304
+offset_bottom = 117.19481
+color = Color(0.61, 0.61, 0.61, 1)
+
 [node name="StartButton" type="Button" parent="VBoxContainer" unique_id=1606168304]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
@@ -66,36 +96,6 @@ Godot 4.6.3"
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 text = "Exit"
-
-[node name="Title" type="Sprite2D" parent="VBoxContainer" unique_id=218409484]
-z_index = 1
-position = Vector2(50.5, -109.5)
-scale = Vector2(0.6015625, 0.6015625)
-texture = ExtResource("2_ekxnf")
-
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Title" unique_id=1323546444]
-z_index = -1
-offset_left = -192.83118
-offset_top = -110.545456
-offset_right = -18.285706
-offset_bottom = 135.48053
-color = Color(0.77, 0.77, 0.77, 1)
-
-[node name="ColorRect2" type="ColorRect" parent="VBoxContainer/Title" unique_id=1529043623]
-z_index = -1
-offset_left = -73.14288
-offset_top = -137.14287
-offset_right = 164.57147
-offset_bottom = 19.116867
-color = Color(0.65, 0.65, 0.65, 1)
-
-[node name="ColorRect3" type="ColorRect" parent="VBoxContainer/Title" unique_id=1367024452]
-z_index = -1
-offset_left = -38.233784
-offset_top = 14.129864
-offset_right = 172.88304
-offset_bottom = 117.19481
-color = Color(0.61, 0.61, 0.61, 1)
 
 [node name="SettingsPanel" type="Panel" parent="." unique_id=222222222]
 visible = false
