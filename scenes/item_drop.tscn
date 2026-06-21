@@ -1,23 +1,38 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://c62pod8rcv8f2"]
 
-[ext_resource type="Script" path="res://scripts/item_pickup.gd" id="1_item_pickup"]
+[ext_resource type="Script" uid="uid://cqa064egpjw4l" path="res://scripts/item_pickup.gd" id="1_item_pickup"]
+[ext_resource type="Texture2D" uid="uid://tf5d7twu6llb" path="res://assets/32rogues/tiles.png" id="2_gvv6n"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_item_drop"]
 size = Vector2(32, 32)
 
-[node name="ItemDrop" type="Area2D"]
-collision_layer = 1
-collision_mask = 1
+[sub_resource type="AtlasTexture" id="AtlasTexture_xsgl2"]
+atlas = ExtResource("2_gvv6n")
+region = Rect2(96, 544, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ai4ee"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xsgl2")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="ItemDrop" type="Area2D" unique_id=46676879]
 script = ExtResource("1_item_pickup")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=738661926]
+visible = false
 offset_left = -16.0
 offset_top = -16.0
 offset_right = 16.0
 offset_bottom = 16.0
 color = Color(0.2, 0.8, 0.2, 1)
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=236260309]
 offset_left = -20.0
 offset_top = -20.0
 offset_right = 20.0
@@ -26,5 +41,8 @@ text = "✪"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=203371151]
 shape = SubResource("RectangleShape2D_item_drop")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1523364973]
+sprite_frames = SubResource("SpriteFrames_ai4ee")

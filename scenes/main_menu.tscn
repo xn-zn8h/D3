@@ -90,7 +90,8 @@ text = "Credits"
 visible = false
 layout_mode = 2
 text = "Created by xn-zn8h
-Godot 4.6.3"
+Godot 4.6.3
+32rogues by sethbb"
 
 [node name="ExitButton" type="Button" parent="VBoxContainer" unique_id=138155775]
 custom_minimum_size = Vector2(0, 50)
